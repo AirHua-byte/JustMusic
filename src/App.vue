@@ -1,32 +1,33 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view />
+  <div id="app" :class="{ 'user-select-none': userSelectNone }">
   </div>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import ModalAddTrackToPlaylist from './components/ModalAddTrackToPlaylist.vue';
+import ModalNewPlaylist from './components/ModalNewPlaylist.vue'
+import Scrollbar from './components/Scrollbar.vue'
+import Navbar from './components/Navbar.vue'
+import Player from './components/Player.vue'
+import Toast from './components/Toast.vue';
+import Lyrics from './views/lyrics.vue';
+import {mapState} from 'vuex';
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
-</style>
+export default {
+  name: 'App',
+  components: {
+    Navbar,
+    Player,
+    Toast,
+    ModalAddTrackToPlaylist,
+    ModalNewPlaylist,
+    Lyrics,
+    Scrollbar
+  },
+  data() {
+    return {
+      userSelectNone: false,
+    };
+  },
+};
+</script>
