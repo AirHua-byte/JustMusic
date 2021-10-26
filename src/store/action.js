@@ -11,7 +11,6 @@ import {
   cloudDisk,
   userAccount,
 } from '@/api/user';
-import { setTimeout } from "core-js";
 
 export default {
   showToast({ state, commit }, text) {
@@ -51,8 +50,126 @@ export default {
           commit('updateLikedXXX', {
             name: 'songs',
             data: newLikeSongs
-          })
+          });
         }
+        dispatch('fetchLikedSongsWithDetails');
       })
-  }
-}
+      .catch(() => {
+        dispatch('showToast', '操作失败，专辑下架或版权锁定');
+      });
+  },
+  fetchLikedSongs: ({ state, commit }) => {
+    if (!isLooseLoggedIn()) return;
+    if (isAccountLoggedIn()) {
+      return userLikedSongsIDs({ uid: state.data.user.userId }).then(result => {
+        if (result.ids) {
+          commit('updateLikedXXX', {
+            name: 'songs',
+            data: result.ids,
+          });
+        }
+      });
+    } else {
+      // TODO:搜索ID登录的用户
+    }
+  },
+  fetchLikedSongsWithDetails: ({ state, commit }) => {
+    return getPlaylistDetail(state.data.likedSongPlaylistID, true).then(result => {
+      if (result.playlist?.trackIds?.length === 0) {
+        return new Promise(resolve => {
+          resolve();
+        });
+      }
+      return getTrackDetail(
+        result.playlist.trackIds
+          .slice(0, 12)
+          .map(t => t.id)
+          .join(',')
+      ).then(result => {
+        commit('updateLikedXXX', {
+          name: 'songsWithDetails',
+          data: result.songs,
+        });
+      });
+    });
+  },
+  fetchLikedPlaylist: ({ state, commit }) => {
+    if (!isLooseLoggedIn()) return;
+    if (isAccountLoggedIn()) {
+      return userPlaylist({
+        uid: state.data.user.userId,
+        limit: 2000,
+        timestamp: new Date().getTime(),
+      }).then(result => {
+        if (result.playlist) {
+          commit('updateLikedXXX', {
+            name: 'playlists',
+            data: result.playlist,
+          });
+          // 同时更新用户喜欢歌曲的歌单id
+          commit('updateData', {
+            key: 'likedSongPlaylistID',
+            value:  result.playlist[0].id,
+          });
+        }
+      });
+    } else {
+      // TODO:搜索ID登录的用户
+    }
+  },
+  fetchLikedAlbums: ({ commit }) => {
+    if (!isAccountLoggedIn()) return;
+    return likedAlbums({ limit: 2000 }).then(result => {
+      if (result.data) {
+        commit('updateLikedXXX', {
+          name: 'albums',
+          data: result.data,
+        });
+      }
+    });
+  },
+  fetchLikedArtists: ({ commit }) => {
+    if (!isAccountLoggedIn()) return;
+    return likedArtists({ limit: 2000 }).then(result => {
+      if (result.data) {
+        commit('updateLikedXXX', {
+          name: 'artists',
+          data: result.data,
+        });
+      }
+    });
+  },
+  fetchLikedMVs: ({ commit }) => {
+    if (!isAccountLoggedIn()) return;
+    return likedMVs({ limit: 1000 }).then(result => {
+      if (result.data) {
+        commit('updateLikedXXX', {
+          name: 'mvs',
+          data: result.data,
+        });
+      }
+    });
+  },
+  fetchCloudDisk: ({ commit }) => {
+    if (!isAccountLoggedIn()) return;
+    return cloudDisk().then(result => {
+      if (result.data) {
+        commit('updateLikedXXX', {
+          name: 'cloudDisk',
+          data: result.data,
+        });
+      }
+    });
+  },
+  fetchUserProfile: ({commit}) => {
+    if (!isAccountLoggedIn()) return;
+    return userAccount().then(result => {
+      if (result.code === 200) {
+        commit('updateData', {
+          key: 'user',
+          value: result.profile,
+        });
+      }
+    });
+  },
+};

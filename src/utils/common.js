@@ -211,4 +211,28 @@ export function bytesToSize(bytes) {
 
   let lang = store.state.settings.lang;
   
+  if (bytes < kiloBytes) return bytes + (lang === 'en' ? 'Bytes' : '字节');
+  else if (bytes < megaBytes)
+    return (bytes / kiloBytes).toFixed(decimal) + 'KB';
+  else if (bytes < gigaBytes)
+    return (bytes / megaBytes).toFixed(decimal) + 'MB';
+  else return (bytes / gigaBytes).toFixed(decimal) + 'GB'; 
+}
+
+export function formatTrackTime(value) {
+  if (!value) return '';
+  /* ~~它代表双非按位取反运算符，
+  需要注意，对于正数，它向下取整；
+  对于负数，向上取整；
+  ~~true == 1
+  ~~false == 0
+  ~~"" == 0
+  ~~[] == 0
+  ~~undefined ==0
+  ~~!undefined == 1
+  ~~null == 0
+  ~~!null == 1 */
+  let min = ~~((value / 60) % 60);
+  let sec = (~~(value % 60)).toString().padStart(2, '0');
+  return `${min}:${sec}`;
 }

@@ -49,4 +49,9 @@ export function doLogout() {
   removeCookie('MUSIC_U');
   removeCookie('__csrf');
   // 更新状态仓库下面的用户信息
+  store.commit('updateDate', { key: 'user', value: {} });
+  // 更新状态仓库中的登录状态
+  store.commit('upadteData', { key: 'loginMode', value: null });
+  // 更新状态仓库中的喜欢列表
+  store.commit('updateData', { key: 'likedSongPlaylistID', value: undefined });
 }
