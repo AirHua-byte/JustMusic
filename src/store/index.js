@@ -21,7 +21,7 @@ const options = {
   plugins,
 };
 
-export default new Vuex.Store(options);
+const store = new Vuex.Store(options);
 
 if ([undefined, null].includes(store.state.settings.lang)) {
   const defaultLang = 'en';

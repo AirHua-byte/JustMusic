@@ -1,18 +1,20 @@
 <template>
   <div id="app" :class="{ 'user-select-none': userSelectNone }">
+    <Navbar v-show="showNavbar"></Navbar>
   </div>
 </template>
 
 <script>
 import ModalAddTrackToPlaylist from './components/ModalAddTrackToPlaylist.vue';
-import ModalNewPlaylist from './components/ModalNewPlaylist.vue'
-import Scrollbar from './components/Scrollbar.vue'
-import Navbar from './components/Navbar.vue'
-import Player from './components/Player.vue'
+import ModalNewPlaylist from './components/ModalNewPlaylist.vue';
+import Scrollbar from './components/Scrollbar.vue';
+import Navbar from './components/Navbar.vue';
+import Player from './components/Player.vue';
 import Toast from './components/Toast.vue';
+// import { ipcRenderer } from './electron/ipcRenderer';
+import { isAccountLoggedIn, isLooseLoggedIn } from '@/utils/auth';
 import Lyrics from './views/lyrics.vue';
-import {mapState} from 'vuex';
-import { isLooseLoggedIn } from './utils/auth';
+import { mapState } from 'vuex';
 
 export default {
   name: 'App',
@@ -27,6 +29,7 @@ export default {
   },
   data() {
     return {
+      isElectron: process.env.IS_ELECTRON,
       userSelectNone: false,
     };
   },
@@ -54,7 +57,8 @@ export default {
     },
   },
   created() {
-    window.addEventListener('keydown', this.handleKeydown);
+    // if (this.isElectron) ipcRenderer(this);
+    // window.addEventListener('keydown', this.handleKeydown);
     this.fetchData();
   },
   methods: {
@@ -69,14 +73,14 @@ export default {
     fetchData() {
       if (!isLooseLoggedIn()) return;
       this.$store.dispatch('fetchLikedSongs');
-      this.$store.dispatch('fetchLikedSongWithDetails');
+      this.$store.dispatch('fetchLikedSongsWithDetails');
       this.$store.dispatch('fetchLikedPlaylist');
-      if (isAccountLoggedIn()) {
-        this.$store.dispatch('fetchLikedAlbums');
-        this.$store,dispatch('fetchLikedArtists');
-        this.$store.dispatch('fetchLikedMVs');
-        this.$store.dispatch('fetchCloudDisk');
-      }
+      // if (isAccountLoggedIn()) {
+      //   this.$store.dispatch('fetchLikedAlbums');
+      //   this.$store.dispatch('fetchLikedArtists');
+      //   this.$store.dispatch('fetchLikedMVs');
+      //   this.$store.dispatch('fetchCloudDisk');
+      // }
     },
     handleScroll() {
       this.$refs.Scrollbar.handleScroll()

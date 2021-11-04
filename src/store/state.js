@@ -1,18 +1,21 @@
 import initLocalStorage from './initLocalStorage';
 import pkg from '../../package.json';
-import { settings } from 'nprogress';
+import updateApp from '@/utils/updateApp';
 
-if (localStorage.setItem('appVersion') === null) {
+if (localStorage.getItem('appVersion') === null) {
   localStorage.setItem('settings', JSON.stringify(initLocalStorage.settings));
   localStorage.setItem('data', JSON.stringify(initLocalStorage.data));
+  localStorage.setItem('appVersion', pkg.version);
 }
+
+updateApp();
 
 export default {
   showLyrics: false,
   enableScrolling: true,
   liked: {
     songs: [],
-    songsWithDetails: [],
+    songsWithDetails: [], // 只有前12首
     playlists: [],
     albums: [],
     artists: [],
@@ -29,7 +32,7 @@ export default {
     timer: null,
   },
   modals: {
-    addTrcakToPlaylistModal: {
+    addTrackToPlaylistModal: {
       show: false,
       selectedTrackID: 0,
     },
@@ -39,7 +42,7 @@ export default {
     },
   },
   dailyTracks: [],
-  lastfm: JSON.parse(localStorage.getItem('lastfm')) | {},
+  lastfm: JSON.parse(localStorage.getItem('lastfm')) || {},
   player: JSON.parse(localStorage.getItem('player')),
   settings: JSON.parse(localStorage.getItem('settings')),
   data: JSON.parse(localStorage.getItem('data')),

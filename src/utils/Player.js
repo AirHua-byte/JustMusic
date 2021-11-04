@@ -131,9 +131,9 @@ export default class {
   }
 
   _init() {
+    // 加载之前本地设置
     this._loadSelfFromLocalStorage();
     Howler.autoUnlock = false;
-    Howler.usingWebAudio = true;
     Howler.usingWebAudio = true;
     Howler.volume(this.volume);
 
@@ -287,7 +287,7 @@ export default class {
 
   _replaceCurrentTrack(
     id,
-    autiplay = true,
+    autoplay = true,
     ifUnplayableThen = 'playNextTrack'
   ) {
     if (autoplay && this._currentTrack.name) {
@@ -327,6 +327,7 @@ export default class {
   _loadSelfFromLocalStorage() {
     const player = JSON.parse(localStorage.getItem('player'));
     if (!player) return;
+    // Object.entries() 方法返回一个给定对象自身可枚举属性的键值对数组
     for (const [key, value] of Object.entries(player)) {
       this[key] = value;
     }

@@ -39,10 +39,9 @@ export function isTrackPlayable(track) {
   return result;
 }
 
-// 暂时没明白这个函数干嘛的
-export function mapTrackPlayableStatus(track, privileges = []) {
-  if (track?.length === undefined) return tracks;
-  return track.map(t => {
+export function mapTrackPlayableStatus(tracks, privileges = []) {
+  if (tracks?.length === undefined) return tracks;
+  return tracks.map(t => {
     const privilege = privileges.find(item => item.id === t.id) || {};
     if (t.privilege) {
       Object.assign(t.privilege, privilege);
@@ -127,7 +126,7 @@ export function changeAppearance(appearance) {
   }
   document.body.setAttribute('data-theme', appearance);
   document
-    .querySelector('meta[name="theme-color]')
+    .querySelector('meta[name="theme-color"]')
     .setAttribute('content', appearance === 'dark' ? '#222' : '#fff');
 }
 

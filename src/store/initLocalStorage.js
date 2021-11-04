@@ -1,4 +1,5 @@
 import { playlistCategories } from "@/utils/staticData";
+import shortcuts from '@/utils/shortcuts';
 
 console.debug('[debug][initLocalStorage.js]');
 const enabledPlaylistCategories = playlistCategories
@@ -16,7 +17,6 @@ let localStorage = {
     outputDevice: 'default',
     showPlaylistsByAppleMusic: true,
     enableUnblockNeteaseMusic: true,
-    // 自动隐藏？
     automaticallyCacheSongs: true,
     cacheLimit: 8192,
     nyancatStyle: false,

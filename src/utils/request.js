@@ -1,7 +1,17 @@
 import axios from 'axios';
-// import { getCookie } from '@/utils/auth'
+import { getCookie } from '@/utils/auth'
 
 let baseURL = '';
+
+if (process.env.IS_ELECTRON) {
+  if (process.env.NODE_ENV === 'production') {
+    baseURL = process.env.VUE_APP_ELECTRON_API_URL;
+  } else {
+    baseURL = process.env.VUE_APP_ELECTRON_API_URL;
+  }
+} else {
+  baseURL = process.env.VUE_APP_NETEASE_API_URL;
+}
 
 const service = axios.create({
   baseURL,
@@ -13,6 +23,13 @@ const service = axios.create({
 // 请求拦截器（在请求之前进行一些配置）
 service.interceptors.request.use(function (config) {
   if(!config.params) config.params = {};
+  if (baseURL[0] !== '/' && !process.env.IS_ELECTRON) {
+    config.params.cookie = `MUSIC_U=${getCookie('MUSIC_U')};`;
+  }
+
+  if (!process.env.IS_ELECTRON && !config.url.includes('/login')) {
+    config.params.realIP = '211.161.244.70';
+  }
 
   const proxy = JSON.parse(localStorage.getItem('settings')).proxyConfig;
   if(['HTTP', 'HTTPS'].includes(proxy.protocol)) {
