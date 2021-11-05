@@ -1,4 +1,4 @@
-import { playlistCategories } from "@/utils/staticData";
+import { playlistCategories } from '@/utils/staticData';
 import shortcuts from '@/utils/shortcuts';
 
 console.debug('[debug][initLocalStorage.js]');

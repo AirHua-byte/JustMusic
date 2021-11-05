@@ -1,4 +1,4 @@
-import { getTrackDetail,scrobble, getMP3 } from '@/api/track';
+import { getTrackDetail, scrobble, getMP3 } from '@/api/track';
 import { result, shuffle } from 'lodash';
 import { Howler, Howl } from 'howler';
 import { cacheTrackSource, getTrackSource } from '@/utils/db';
@@ -148,12 +148,15 @@ export default class {
     this._setIntervals();
 
     // 初始化私人FM
-    if (this._personalFMNextTrack.id === 0 || this._personalFMNextTrack.id === 0) {
+    if (
+      this._personalFMNextTrack.id === 0 ||
+      this._personalFMNextTrack.id === 0
+    ) {
       personalFM().then(result => {
         this._personalFMTrack = result.data[0];
         this._personalFMNextTrack = result.data[1];
         return this._personalFMTrack;
-      })
+      });
     }
   }
 
@@ -209,7 +212,7 @@ export default class {
       sourceid: this.playlistSource.id,
       time,
     });
-    if(
+    if (
       store.state.lastfm.key !== undefined &&
       (time >= trackDuration / 2 || time >= 240)
     ) {
@@ -237,7 +240,7 @@ export default class {
       document.title = `${this._currentTrack.name} · ${this._currentTrack.ar[0].name} - YesPlayMusic`;
     }
     this.setOutputDevice();
-    this._howler.once('end',() => {
+    this._howler.once('end', () => {
       this._nextTrackCallback();
     });
   }
@@ -261,7 +264,7 @@ export default class {
           cacheTrackSource(track, source, result.data[0].br);
         }
         return source;
-      })
+      });
     } else {
       return new Promise(resolve => {
         resolve(`https://music.163.com/song/media/outer/url?id=${track.id}`);
@@ -321,7 +324,7 @@ export default class {
     getTrackDetail(nextTrackID).then(data => {
       let track = data.songs[0];
       this._getAudioSource(track);
-    })
+    });
   }
 
   _loadSelfFromLocalStorage() {
@@ -337,7 +340,7 @@ export default class {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('play', () => {
         this.play();
-      })
+      });
       navigator.mediaSession.setActionHandler('pause', () => {
         this.pause();
       });
@@ -418,7 +421,7 @@ export default class {
   }
 
   _pauseDiscordPresence(track) {
-    // 
+    //
   }
 
   currentTrackID() {
@@ -519,10 +522,12 @@ export default class {
   }
 
   setOutputDevice() {
-    if (this._howler ?._sounds.length <= 0 || !this._howler?._sounds[0]._node) {
+    if (this._howler?._sounds.length <= 0 || !this._howler?._sounds[0]._node) {
       return;
     }
-    this._howler?._sounds[0]._node.setSinkId(store.state.settings.setOutputDevice);
+    this._howler?._sounds[0]._node.setSinkId(
+      store.state.settings.setOutputDevice
+    );
   }
 
   replacePlaylist(

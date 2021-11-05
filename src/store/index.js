@@ -1,5 +1,5 @@
-import Vue from "vue";
-import Vuex from "vuex";
+import Vue from 'vue';
+import Vuex from 'vuex';
 import state from './state';
 import mutations from './mutation';
 import actions from './action';
@@ -8,7 +8,7 @@ import Player from '@/utils/Player';
 // vuex 自定义插件
 import saveToLocalStorage from './plugins/localStorage';
 import { getSendSettingsPlugin } from './plugins/sendSettings';
-import { changeAppearance } from "@/utils/common";
+import { changeAppearance } from '@/utils/common';
 
 Vue.use(Vuex);
 
@@ -31,11 +31,12 @@ if ([undefined, null].includes(store.state.settings.lang)) {
     .set('en', 'en')
     .set('tr', 'tr');
 
-  store.state.settings.lang = langMapper.get(
-    langMapper.has(navigator.language)
-      ? navigator.language
-      : navigator.language.slice(0, 2)
-  ) || defaultLang;
+  store.state.settings.lang =
+    langMapper.get(
+      langMapper.has(navigator.language)
+        ? navigator.language
+        : navigator.language.slice(0, 2)
+    ) || defaultLang;
 
   localStorage.setItem('settings', JSON.stringify(store.state.settings));
 }

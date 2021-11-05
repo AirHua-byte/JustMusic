@@ -20,7 +20,7 @@ Vue.filter('formatTime', (Milliseconds, format = 'HH:MM:SS') => {
       ? `${hours}:${mins.padStart(2, '0')}:${seconds}`
       : `${mins}:${seconds}`;
   } else if (format === 'Human') {
-    let hoursUnit,minitesUnit;
+    let hoursUnit, minitesUnit;
     switch (locale.locale) {
       case 'zh-CN':
         hoursUnit = '小时';
@@ -68,7 +68,7 @@ Vue.filter('resizeImage', (imgUrl, size = 512) => {
     httpsImgUrl = 'https' + imgUrl.slice(4);
   }
   return `${httpsImgUrl}?param=${size}y${size}`;
-})
+});
 
 Vue.filter('formatPlayCount', count => {
   if (!count) return '';

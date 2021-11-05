@@ -1,3 +1,1 @@
-export function getSendSettingsPlugin() {
-  
-}
+export function getSendSettingsPlugin() {}

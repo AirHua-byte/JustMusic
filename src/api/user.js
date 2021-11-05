@@ -26,7 +26,7 @@ export function userAccount() {
     url: '/user/account',
     method: 'get',
     params: {
-      timestamp: new Date().getTime()
+      timestamp: new Date().getTime(),
     },
   });
 }
@@ -114,7 +114,7 @@ export function likedArtists(params) {
     method: 'get',
     params: {
       limit: params.limit,
-      timestamp: new  Date().getTime(),
+      timestamp: new Date().getTime(),
     },
   });
 }

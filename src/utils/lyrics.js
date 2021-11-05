@@ -1,7 +1,7 @@
 export function lyricParser(lrc) {
   return {
     lyric: parseLyric(lrc?.lrc?.lyric || ''),
-    tlyric:  parseLyric(lrc?.tlyric?.lyric || ''),
+    tlyric: parseLyric(lrc?.tlyric?.lyric || ''),
     lyricuser: lrc.lyricUser,
     transuser: lrc.transUser,
   };

@@ -14,7 +14,7 @@ export function getAlbum(id) {
       method: 'get',
       params: {
         id,
-      }
+      },
     }).then(data => {
       cacheAlbum(id, data);
       data.songs = mapTrackPlayableStatus(data.songs);
@@ -57,7 +57,7 @@ export function albumDynamicDetail(id) {
   return request({
     url: '/album/detail/dynamic',
     method: 'get',
-    params:  { id, timestamp:new Date().getTime() },
+    params: { id, timestamp: new Date().getTime() },
   });
 }
 
@@ -75,5 +75,5 @@ export function likeAAlbum(params) {
     url: '/album/sub',
     method: 'post',
     params,
-  })
+  });
 }

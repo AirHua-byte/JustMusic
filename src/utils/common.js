@@ -1,9 +1,9 @@
-import { isAccountLoggedIn } from "./auth";
-import { refreshCookie } from "@/api/auth";
-import { dailySignin } from "@/api/user";
-import dayjs from "dayjs";
-import store from "@/store";
-import { setTimeout } from "core-js";
+import { isAccountLoggedIn } from './auth';
+import { refreshCookie } from '@/api/auth';
+import { dailySignin } from '@/api/user';
+import dayjs from 'dayjs';
+import store from '@/store';
+import { setTimeout } from 'core-js';
 
 // 检查是否可以播放
 export function isTrackPlayable(track) {
@@ -32,7 +32,7 @@ export function isTrackPlayable(track) {
   ) {
     result.playable = false;
     result.reason = '无版权';
-  } else if (track.privilege?.st <0 && isAccountLoggedIn()) {
+  } else if (track.privilege?.st < 0 && isAccountLoggedIn()) {
     result.playable = false;
     result.reason = '已下架';
   }
@@ -52,7 +52,7 @@ export function mapTrackPlayableStatus(tracks, privileges = []) {
     t.playable = result.playable;
     t.reason = result.reason;
     return t;
-  })
+  });
 }
 
 export function randomNum(minNum, maxNum) {
@@ -60,7 +60,7 @@ export function randomNum(minNum, maxNum) {
     case 1:
       return parseInt(Math.random() * minNum + 1, 10);
     case 2:
-      return parseInt(Math.random()* (maxNum - minNum +  1) + minNum, 10);
+      return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
     default:
       return 0;
   }
@@ -81,7 +81,7 @@ export function shuffleAList(list) {
 
 export function throttle(fn, time) {
   let isRun = false;
-  return function() {
+  return function () {
     if (isRun) return;
     fn.apply(this, arguments);
     setTimeout(() => {
@@ -172,7 +172,7 @@ export function splitSoundtrackAlbumTitle(title) {
   return {
     title: title,
     subtitle: '',
-  }
+  };
 }
 
 export function splitAlbumTitle(title) {
@@ -192,7 +192,7 @@ export function splitAlbumTitle(title) {
         .replace(`[${keyword}]`, '')
         .replace(`- ${keyword}`, '')
         .replace(`${keyword}`, ''),
-      subtitle: keyword
+      subtitle: keyword,
     };
   }
   return {
@@ -209,13 +209,13 @@ export function bytesToSize(bytes) {
   let gigaBytes = marker * marker * marker;
 
   let lang = store.state.settings.lang;
-  
+
   if (bytes < kiloBytes) return bytes + (lang === 'en' ? 'Bytes' : '字节');
   else if (bytes < megaBytes)
     return (bytes / kiloBytes).toFixed(decimal) + 'KB';
   else if (bytes < gigaBytes)
     return (bytes / megaBytes).toFixed(decimal) + 'MB';
-  else return (bytes / gigaBytes).toFixed(decimal) + 'GB'; 
+  else return (bytes / gigaBytes).toFixed(decimal) + 'GB';
 }
 
 export function formatTrackTime(value) {

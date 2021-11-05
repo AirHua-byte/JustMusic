@@ -11,8 +11,8 @@ const routes = [
     component: Home,
     meta: {
       keepAlive: true,
-      savePosition: true
-    }
+      savePosition: true,
+    },
   },
 ];
 

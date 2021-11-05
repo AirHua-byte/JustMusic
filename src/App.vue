@@ -25,7 +25,7 @@ export default {
     ModalAddTrackToPlaylist,
     ModalNewPlaylist,
     Lyrics,
-    Scrollbar
+    Scrollbar,
   },
   data() {
     return {
@@ -83,8 +83,8 @@ export default {
       // }
     },
     handleScroll() {
-      this.$refs.Scrollbar.handleScroll()
-    }
-  }
+      this.$refs.Scrollbar.handleScroll();
+    },
+  },
 };
 </script>

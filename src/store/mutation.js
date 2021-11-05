@@ -1,5 +1,5 @@
 import shortcuts from '@/utils/shortcuts';
-import cloneDeep from 'lodash/cloneDeep'
+import cloneDeep from 'lodash/cloneDeep';
 
 export default {
   updateLikedXXX(state, { name, data }) {
@@ -31,9 +31,8 @@ export default {
       c => c === name
     );
     if (index !== -1) {
-      state.settings.enabledPlaylistCategories = state.settings.enabledPlaylistCategories.filter(
-        c => c !== name
-      );
+      state.settings.enabledPlaylistCategories =
+        state.settings.enabledPlaylistCategories.filter(c => c !== name);
     } else {
       state.settings.enabledPlaylistCategories.push(name);
     }
@@ -43,7 +42,7 @@ export default {
   },
   updateModal(state, { modalName, key, value }) {
     state.modals[modalName][key] = value;
-    if(key === 'show') {
+    if (key === 'show') {
       // 100ms的延迟是为等待右键菜单blur之后再disableScrolling
       value === true
         ? setTimeout(() => (state.enableScrolling = false), 100)
@@ -73,4 +72,4 @@ export default {
   enableScrolling(state, status = null) {
     state.enableScrolling = status ? status : !state.enableScrolling;
   },
-}
+};
