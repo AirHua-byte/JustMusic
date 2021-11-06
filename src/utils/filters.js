@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import locale from '@/locale';
-import { format } from 'core-js/core/date';
 
 Vue.filter('formatTime', (Milliseconds, format = 'HH:MM:SS') => {
   if (!Milliseconds) return '';

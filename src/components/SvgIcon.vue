@@ -36,4 +36,8 @@ export default {
 .svg-icon {
   fill: currentColor;
 }
+use {
+  width: 50px;
+  height: 50px;
+}
 </style>

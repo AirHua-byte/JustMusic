@@ -1,16 +1,20 @@
 import Vue from 'vue';
+import VueAnalytics from 'vue-analytics';
 import App from './App.vue';
-import './registerServiceWorker';
 import router from './router';
-import '@/assets/icons';
 import store from './store';
+import i18n from './locale';
+import '@/utils/filters';
+import '@/assets/icons';
+import './registerServiceWorker';
+import { dailyTask } from './utils/common';
 import '@/assets/css/global.scss';
 import NProgress from 'nprogress';
 import '@/assets/css/nprogress.css';
 
 window.resetApp = () => {
   localStorage.clear();
-  indexedDB.deleteDatabase('justmusic');
+  indexedDB.deleteDatabase('yesplaymusic');
   document.cookie.split(';').forEach(c => {
     document.cookie = c
       .replace(/^ +/, '')
@@ -24,12 +28,18 @@ console.log(
   'background:unset;color:unset;'
 );
 
+Vue.use(VueAnalytics, {
+  id: 'UA-180189423-1',
+  router,
+});
 Vue.config.productionTip = false;
 
 // NProgress.start();
 NProgress.configure({ showSpinner: false, trickleSpeed: 100 });
+dailyTask();
 
 new Vue({
+  i18n,
   router,
   store,
   render: h => h(App),

@@ -1,30 +1,31 @@
 <template>
   <div id="app" :class="{ 'user-select-none': userSelectNone }">
+    <Scrollbar v-show="!showLyrics" ref="scrollbar"></Scrollbar>
     <Navbar v-show="showNavbar"></Navbar>
   </div>
 </template>
 
 <script>
-import ModalAddTrackToPlaylist from './components/ModalAddTrackToPlaylist.vue';
-import ModalNewPlaylist from './components/ModalNewPlaylist.vue';
+// import ModalAddTrackToPlaylist from './components/ModalAddTrackToPlaylist.vue';
+// import ModalNewPlaylist from './components/ModalNewPlaylist.vue';
 import Scrollbar from './components/Scrollbar.vue';
 import Navbar from './components/Navbar.vue';
-import Player from './components/Player.vue';
-import Toast from './components/Toast.vue';
+// import Player from './components/Player.vue';
+// import Toast from './components/Toast.vue';
 // import { ipcRenderer } from './electron/ipcRenderer';
 import { isAccountLoggedIn, isLooseLoggedIn } from '@/utils/auth';
-import Lyrics from './views/lyrics.vue';
+// import Lyrics from './views/lyrics.vue';
 import { mapState } from 'vuex';
 
 export default {
   name: 'App',
   components: {
     Navbar,
-    Player,
-    Toast,
-    ModalAddTrackToPlaylist,
-    ModalNewPlaylist,
-    Lyrics,
+    // Player,
+    // Toast,
+    // ModalAddTrackToPlaylist,
+    // ModalNewPlaylist,
+    // Lyrics,
     Scrollbar,
   },
   data() {
