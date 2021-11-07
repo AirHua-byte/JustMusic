@@ -33,13 +33,13 @@
       </div>
 
       <div class="navigation-links">
-        <router-link to="/" :class="{ active: $router.name === 'home' }">
+        <router-link to="/" :class="{ active: $route.name === 'home' }">
           {{ $t('nav.home') }}
         </router-link>
-        <router-link to="/explore" :class="{ active: $router.name === 'explore' }">
+        <router-link to="/explore" :class="{ active: $route.name === 'explore' }">
           {{ $t('nav.explore') }}
         </router-link>
-        <router-link to="/library" :class="{ active: $router.name === 'library' }">
+        <router-link to="/library" :class="{ active: $route.name === 'library' }">
           {{ $t('nav.library') }}
         </router-link>
       </div>
@@ -69,7 +69,7 @@
         <svg-icon icon-class="settings" />
         {{ $t('library.userProfileMenu.settings') }}
       </div>
-      <div class="item" v-if="!isLooseLoggedIn" @click="Login">
+      <div class="item" v-if="!isLooseLoggedIn" @click="toLogin">
         <svg-icon icon-class="login" />
         {{ $t('login.login') }}
       </div>

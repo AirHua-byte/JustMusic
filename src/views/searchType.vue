@@ -1,5 +1,5 @@
 <template>
   <div>
-    lyrics
+    searchType
   </div>
 </template>

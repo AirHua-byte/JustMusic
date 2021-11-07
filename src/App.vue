@@ -2,6 +2,16 @@
   <div id="app" :class="{ 'user-select-none': userSelectNone }">
     <Scrollbar v-show="!showLyrics" ref="scrollbar"></Scrollbar>
     <Navbar v-show="showNavbar"></Navbar>
+    <main
+      ref="main"
+      :style="{ overflow: enableScrolling ? 'auto' : 'hidden' }"
+      @scroll="handleScroll"
+    >
+      <keep-alive>
+        <router-view v-if="$route.meta.keepAlive"></router-view>
+      </keep-alive>
+      <router-view v-if="!$route.meta.keepAlive"></router-view>
+    </main>
   </div>
 </template>
 
@@ -59,7 +69,7 @@ export default {
   },
   created() {
     // if (this.isElectron) ipcRenderer(this);
-    // window.addEventListener('keydown', this.handleKeydown);
+    window.addEventListener('keydown', this.handleKeydown);
     this.fetchData();
   },
   methods: {
@@ -76,16 +86,41 @@ export default {
       this.$store.dispatch('fetchLikedSongs');
       this.$store.dispatch('fetchLikedSongsWithDetails');
       this.$store.dispatch('fetchLikedPlaylist');
-      // if (isAccountLoggedIn()) {
-      //   this.$store.dispatch('fetchLikedAlbums');
-      //   this.$store.dispatch('fetchLikedArtists');
-      //   this.$store.dispatch('fetchLikedMVs');
-      //   this.$store.dispatch('fetchCloudDisk');
-      // }
+      if (isAccountLoggedIn()) {
+        this.$store.dispatch('fetchLikedAlbums');
+        this.$store.dispatch('fetchLikedArtists');
+        this.$store.dispatch('fetchLikedMVs');
+        this.$store.dispatch('fetchCloudDisk');
+      }
     },
     handleScroll() {
-      this.$refs.Scrollbar.handleScroll();
+      this.$refs.scrollbar.handleScroll();
     },
   },
 };
 </script>
+
+<style lang="scss">
+#app {
+  width: 100%;
+  transition: all 0.4s;
+}
+main {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  padding: 64px 10vw 96px 10vw;
+  box-sizing: border-box;
+}
+@media (max-width: 1336px) {
+  main {
+    padding: 64px 5vw 96px 5vw;
+  }
+}
+main::-webkit-scrollbar {
+  width: 0px;
+}
+</style>

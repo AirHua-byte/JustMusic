@@ -34,7 +34,6 @@ Vue.use(VueAnalytics, {
 });
 Vue.config.productionTip = false;
 
-// NProgress.start();
 NProgress.configure({ showSpinner: false, trickleSpeed: 100 });
 dailyTask();
 
