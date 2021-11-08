@@ -44,13 +44,25 @@ export default {
   },
   computed: {
     imageStyles() {
-      return '';
+      let styles = {};
+      if (this.fixedSize !== 0) {
+        styles.width = this.fixedSize + 'px';
+        styles.height = this.fixedSize + 'px';
+      }
+      if (this.type === 'artist') styles.borderRadius = '50%';
+      return styles;
     },
     playButtonStyles() {
-      return '';
+      let styles = {};
+      styles.width = this.playButtonSize + '%';
+      styles.height = this.playButtonSize + '%';
+      return styles;
     },
     shadowStyles() {
-      return '';
+      let styles = {};
+      styles.backgroundImage = `url(${this.imageUrl})`;
+      if (this.type === 'artist') styles.borderRadius = '50%';
+      return styles;
     },
   },
   methods: {
