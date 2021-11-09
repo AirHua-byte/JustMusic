@@ -12,19 +12,39 @@
         :type="type"
         :play-button-size="type === 'artist' ? 26 : playButtonSize"
       ></Cover>
+      <div class="text">
+        <div class="info" v-if="showPlayCount">
+          <span class="play-count">
+            <svg-icon icon-class="play"></svg-icon>
+            {{ item.playCount | formatPlayCount }}
+          </span>
+        </div>
+        <div class="title" :style="{ fontSize: subTextFontSize }">
+          <span v-if="isExplicit(item)" class="explicit-symbol">
+            <ExplicitSymbol></ExplicitSymbol>
+          </span>
+          <span v-if="isPrivacy(item)" class="lock-icon">
+            <svg-icon icon-class="lock"></svg-icon>
+          </span>
+          <router-link :to="getTitleLink(item)">{{ item.name }}</router-link>
+        </div>
+        <div class="info" v-if="type !== 'artist' && subText !== 'none'">
+          <span v-html="getSubText(item)"></span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import Cover from '@/components/Cover.vue';
-// import ExplicitSymbol from '@/components/ExplicitSymbol.vue';
+import ExplicitSymbol from '@/components/ExplicitSymbol.vue';
 
 export default {
   name: 'CoverRow',
   components: {
     Cover,
-    // ExplicitSymbol,
+    ExplicitSymbol,
   },
   props: {
     items: { type: Array, require: true },
@@ -82,17 +102,51 @@ export default {
       return `/${this.type}/${item.id}`;
     },
     getImageUrl(item) {
-      /* if (item.img1v1Url) {
+      if (item.img1v1Url) {
         let img1v1ID = item.img1v1Url.split('/');
         img1v1ID = img1v1ID[img1v1ID.length - 1];
         if (img1v1ID === '5639395138885805.jpg') {
           // 没有头像的歌手，网易云返回的img1v1Url并不是正方形的 😅😅😅
           return 'https://p2.music.126.net/VnZiScyynLG7atLIZ2YPkw==/18686200114669622.jpg?param=512y512';
         }
-      } */
+      }
       let img = item.img1v1Url || item.picUrl || item.coverImgUrl;
       return `${img?.replace('http://', 'https://')}?param=512y512`;
     },
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.cover-row {
+  display: gird;
+}
+.item {
+  color: var(--color-text);
+  .text {
+    margin-top: 8px;
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 20px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      word-break: break-all;
+    }
+    .info {
+      font-size: 12px;
+      opacity: 0.68;
+      line-height: 18px;
+      display: -webkit-box;
+      // 垂直排列
+      -webkit-box-orient: vertical;
+      // 文本显示为两行
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      word-break: break-word;
+    }
+  }
+}
+</style>
