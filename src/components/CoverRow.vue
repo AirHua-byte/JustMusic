@@ -119,7 +119,7 @@ export default {
 
 <style lang="scss" scoped>
 .cover-row {
-  display: gird;
+  display: grid;
 }
 .item {
   color: var(--color-text);
@@ -147,6 +147,50 @@ export default {
       overflow: hidden;
       word-break: break-word;
     }
+  }
+}
+.item.artist {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  .cover {
+    display: flex;
+  }
+  .title {
+    margin-top: 4px;
+  }
+}
+@media (max-width: 834px) {
+  .item .text .title {
+    font-size: 14px;
+  }
+}
+.explicit-symbol {
+  opacity: 0.28;
+  color: var(--color-text);
+  float: right;
+  .svg-icon {
+    margin-bottom: -3px;
+  }
+}
+.lock-icon {
+  opacity: 0.28;
+  color: var(--color-text);
+  margin-right: 4px;
+  .svg-icon {
+    height: 4px;
+    width: 12px;
+  }
+}
+.play-count {
+  font-weight: 600;
+  opacity: 0.58;
+  color: var(--color-text);
+  font-size: 12px;
+  .svg-icon {
+    margin-right: 3px;
+    width: 8px;
+    width: 8px;
   }
 }
 </style>

@@ -146,7 +146,7 @@ img {
   width: 100%;
   filter: blur(16px) opacity(0.6);
   transform: scale(0.92, 0.96);
-  // z-index: -1;
+  z-index: -1;
   background-size: cover;
   border-radius: 0.75em;
   aspect-ratio: 1 / 1;
