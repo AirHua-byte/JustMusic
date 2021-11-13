@@ -12,6 +12,9 @@
       </keep-alive>
       <router-view v-if="!$route.meta.keepAlive"></router-view>
     </main>
+    <transition name="slide-up">
+      <Player v-if="enablePlayer" v-show="showPlayer" ref="player"></Player>
+    </transition>
   </div>
 </template>
 
@@ -20,7 +23,7 @@
 // import ModalNewPlaylist from './components/ModalNewPlaylist.vue';
 import Scrollbar from './components/Scrollbar.vue';
 import Navbar from './components/Navbar.vue';
-// import Player from './components/Player.vue';
+import Player from './components/Player.vue';
 // import Toast from './components/Toast.vue';
 // import { ipcRenderer } from './electron/ipcRenderer';
 import { isAccountLoggedIn, isLooseLoggedIn } from '@/utils/auth';
@@ -31,7 +34,7 @@ export default {
   name: 'App',
   components: {
     Navbar,
-    // Player,
+    Player,
     // Toast,
     // ModalAddTrackToPlaylist,
     // ModalNewPlaylist,
@@ -61,6 +64,7 @@ export default {
       );
     },
     enablePlayer() {
+      // console.log(this.player.enabled)
       return this.player.enabled && this.$route.name !== 'lastfmCallback';
     },
     showNavbar() {
@@ -122,5 +126,13 @@ main {
 }
 main::-webkit-scrollbar {
   width: 0px;
+}
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.4s;
+}
+.slide-up-enter,
+.slide-up-leave-to {
+  transform: translateY(100%);
 }
 </style>
