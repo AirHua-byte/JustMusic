@@ -86,7 +86,99 @@
             ></ButtonTwoTone>
           </div>
         </div>
+        <div class="search-box" v-if="displaySearchInPlaylist">
+          <div class="container" :class="{ active: inputFocus }">
+            <svg-icon icon-class="search"></svg-icon>
+            <div class="input">
+              <input
+                v-model="inputSearchKeyWords"
+                v-focus
+                :placeholder="inputFocus ? '' : $t('playlist.search')"
+                @input="inputDebounce()"
+                @focus="inputFocus = true"
+                @blur="inputFocus = false"
+              />
+            </div>
+          </div>
+        </div>
       </div>
+
+      <div class="special-playlist" v-if="specialPlaylistInfo !== undefined">
+        <div
+          class="title"
+          :class="specialPlaylistInfo.gradient"
+          @click.right="openMenu"
+        >
+          {{ specialPlaylistInfo.name }}
+        </div>
+        <div class="subtitle">
+          {{ playlist.englishTitle }} · {{ playlist.updateFrequency }}
+        </div>
+        <div class="buttons">
+          <ButtonTwoTone
+            class="play-button"
+            icon-class="play"
+            color="grey"
+            @click.native="playPlaylistByID()"
+          >
+            {{ $t('common.play') }}
+          </ButtonTwoTone>
+          <ButtonTwoTone
+            v-if="playlist.creator.userId !== data.user.userId"
+            :icon-class="playlist.subscribed ? 'heart-solid' : 'heart'"
+            :icon-button="true"
+            :horizontal-padding="0"
+            :color="playlist.subscribed ? 'blue' : 'grey'"
+            :text-color="playlist.subscribed ? '#335eea' : ''"
+            :background-color="
+              playlist.subscribed ? 'var(--color-secondary-bg)' : ''
+            "
+            @click.native="likePlaylist"
+          >
+          </ButtonTwoTone>
+          <ButtonTwoTone
+            icon-class="more"
+            :icon-button="true"
+            :horizontal-padding="0"
+            color="grey"
+            @click.native="openMenu"
+          >
+          </ButtonTwoTone>
+        </div>
+      </div>
+
+      <div class="user-info" v-if="isLikeSongsPage">
+        <h1>
+          <img :src="data.user.avatarUrl | resizeImage" alt="" />
+          {{ data.user.nickname }}{{ $t('library.sLikedSongs') }}
+        </h1>
+        <div class="search-box-likepage" @click="searchInPlaylist()">
+          <div class="container" :class="{ active: inputFocus }">
+            <scg-icon icon-class="search"></scg-icon>
+            <div class="input" :style="{ width: searchInputWidth }">
+              <input
+                v-if="displaySearchInPlaylist"
+                v-model.trim="inputSearchKeyWords"
+                v-focus
+                :placeholder="inputFocus ? '' : $t('playlist.search')"
+                @input="inputDebounce()"
+                @focus="inputFocus = true"
+                @blur="inputFocus = false"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <TrackList
+        :id="playlist.id"
+        :tracks="filteredTracks"
+        type="playlist"
+        :extra-context-menu-item="
+          isUserOwnPlaylist ? ['removeTrackFromPlaylist'] : []
+        "
+      >
+      </TrackList>
     </div>
   </div>
 </template>
@@ -106,7 +198,7 @@ import {
 
 import ButtonTwoTone from '@/components/ButtonTwoTone.vue';
 // import ContextMenu from '@/components/ContextMenu.vue';
-// import TrackList from '@/components/TrackList.vue';
+import TrackList from '@/components/TrackList.vue';
 import Cover from '@/components/Cover.vue';
 // import Modal from '@/components/Modal.vue';
 
@@ -203,7 +295,7 @@ export default {
     Cover,
     ButtonTwoTone,
     // ContextMenu,
-    // TrackList,
+    TrackList,
     // Modal,
   },
   directives: {

@@ -43,6 +43,7 @@ export default {
     },
     openMenu(e) {
       this.showMenu = true;
+      // this.$nextTick()将回调延迟到下次 DOM 更新循环之后执行。
       this.$nextTick(
         function () {
           this.$refs.menu.focus();
