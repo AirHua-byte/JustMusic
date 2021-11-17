@@ -1,17 +1,101 @@
 <template>
-  <div>
-    TrackListItem
+  <div class="track"
+    :class="trackClass"
+    :style="trackStyle"
+    :title="showUnavailableSongInGreyStyle ? track.reason : ''"
+    @mousemove="hover = true"
+    @mouseleave="hover = false"
+  >
+    <img
+      v-if="!isAlbum"
+      :src="imgUrl"
+      alt=""
+      :class="{ hover: focus }"
+      @click="goToAlbum"
+    />
+    <div class="no" v-if="showOrderNumber">
+      <button v-show="focus && track.playable && !isPlaying" @click="playTrack">
+        <svg-icon
+          icon-class="play"
+          style="height: 14px; width: 14px"
+        >
+        </svg-icon>
+      </button>
+      <span v-show="(!foucs || !track.playable) && !isPlaying">
+        {{ track.no }}
+      </span>
+      <button v-show="isPlaying">
+        <svg-icon
+          icon-class="volume"
+          style="height: 16px; width: 16px"
+        >
+        </svg-icon>
+      </button>
+    </div>
+    <div class="title-and-artist">
+      <div class="container">
+        <div class="title">
+          {{ track.name }}
+          <span v-if="isAlbum" class="featured">
+            <ArtistsInLine
+              :artists="track.ar"
+              :exclude="$parent.albumObject.artist.name"
+              prefix="-"
+            >
+            </ArtistsInLine>
+          </span>
+          <span class="explicit-symbol" v-if="isAlbum && track.mark === 1318912">
+            <ExplicitSymbol></ExplicitSymbol>
+          </span>
+          <span class="translate" :title="translate" v-if="isTranslate">
+            {{ translate }}
+          </span>
+        </div>
+        <div class="artist" v-if="!isAlbum">
+          <span
+            v-if="track.mark === 1318912"
+            class="explicit-symbol before-artist"
+          >
+            <ExplicitSymbol :size="15"></ExplicitSymbol>
+          </span>
+          <ArtistsInLine :artists="artists"></ArtistsInLine>
+        </div>
+      </div>
+      <div></div>
+    </div>
+    
+    <div class="album" v-if="showAlbumName">
+      <router-link :to="`/album/${album.id}`">{{ album.name }}</router-link>
+      <div></div>
+    </div>
+
+    <div class="action" v-if="showLikeButton">
+      <button @click="likeThisSong">
+        <svg-icon
+          icon-class="heart"
+          :style="{
+            visibility: focus && !isLiked ? 'visible' : 'hidden',
+          }"
+        >
+        </svg-icon>
+        <svg-icon v-show="isLiked" icon-class="heart-solid"></svg-icon>
+      </button>
+    </div>
+
+    <div class="time" v-if="showTrackTime">
+      {{ track.dt | formatTime }}
+    </div>
   </div>
 </template>
 
 <script>
-import ArtistsInline from '@/components/ArtistsInLine.vue';
+import ArtistsInLine from '@/components/ArtistsInLine.vue';
 import ExplicitSymbol from '@/components/ExplicitSymbol.vue';
 import { mapState } from 'vuex';
 
 export default {
   name: 'TrackListItem',
-  components: { ArtistsInline, ExplicitSymbol },
+  components: { ArtistsInLine, ExplicitSymbol },
   props: {
     trackProp: Object,
     highlightPlayingTrack: {
@@ -50,47 +134,58 @@ export default {
       else t = this.track.alia[0];
       return t;
     },
-    type() {
+    /* type() {
 
-    },
+    }, */
     isAlbum() {
-
+      return this.type === 'album';
     },
     isTranslate() {
-      
+      return this.track?.tns?.length > 0 || this.track.alia?.length > 0;
     },
-    isPlaylist() {
+    /* isPlaylist() {
 
-    },
+    }, */
     isLiked() {
-
+      return this.$parent.liked.songs.includes(this.track?.id);
     },
-    isPlaying() {
+    /* isPlaying() {
 
-    },
+    }, */
     trackClass() {
-
+      let trackClass = [this.type];
+      if (!this.track.playable && this.showUnavailableSongInGreyStyle)
+        trackClass.push('disable');
+      if (this.isPlaying && this.highlightPlayingTrack)
+        trackClass.push('playing')
+      if (this.focus) trackClass.push('focus');
+      return trackClass;
     },
-    isMenuOpened() {
+    /* isMenuOpened() {
 
-    },
+    }, */
     focus() {
-
+      return (
+        (this.hover && this.$parent.rightClickedTrack.id === 0) ||
+        this.isMenuOpened
+      );
     },
     showUnavailableSongInGreyStyle() {
-
+      return process.env.IS_ELECTRON
+        ? !this.$store.state.settings.enableUnblockNeteaseMusic
+        : true;
     },
     showLikeButton() {
-
+      return this.type !== 'tracklist' && this.type !== 'cloudDisk';
     },
     showOrderNumber() {
-
+      return this.type === 'album';
     },
     showAlbumName() {
-
+      return this.type !== 'album' && this.type !== 'tracklist';
     },
     showTrackTime() {
-
+      return this.type !== 'tracklist';
     },
   },
   methods: {
@@ -100,9 +195,210 @@ export default {
     playTrack() {
 
     },
-    likedThisSong() {
+    likeThisSong() {
 
     },
   },
 };
 </script>
+
+<style lang="scss" scoped>
+button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  background: transparent;
+  border-radius: 25%;
+  transition: transform 0.2s;
+  .svg-icon {
+    height: 16px;
+    width: 16px;
+    color: var(--color-primary);
+  }
+  &:hover {
+    transform: scale(1.12);
+  }
+  &:active {
+    transform: scale(0.96);
+  }
+}
+.track {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 12px;
+  user-select: none;
+  .no {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    margin: 0 20px 0 10px;
+    width: 12px;
+    color: var(--color-text);
+    cursor: default;
+    span {
+      opacity: 0.58;
+    }
+  }
+  .explicit-symbol {
+    opacity: 0.28;
+    color: var(--color-text);
+    .svg-icon {
+      margin-bottom: -3px;
+    }
+  }
+  .explicit-symbol.before-artist {
+    margin-right: 2px;
+    .svg-icon {
+      margin-bottom: -3px;
+    }
+  }
+  img {
+    border-radius: 8px;
+    height: 46px;
+    width: 46px;
+    margin-right: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+  }
+  img.hover {
+    filter: drop-shadow(100 200 0 black);
+  }
+  .title-and-artist {
+    flex: 1;
+    display: flex;
+    .container {
+      display: flex;
+      flex-direction: column;
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-text);
+      cursor: default;
+      padding-right: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      overflow: hidden;
+      word-break: break-all;
+      .featured {
+        margin-right: 2px;
+        font-weight: 500;
+        font-size: 14px;
+        opacity: 0.72;
+      }
+      .translate {
+        color: #aeaeae;
+        margin-left: 4px;
+      }
+    }
+    .artist {
+      margin-top: 2px;
+      font-size: 13px;
+      opacity: 0.68;
+      color: var(--color-text);
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+      overflow: hidden;
+      a {
+        span {
+          margin-right: 3px;
+          opacity: 0.8;
+        }
+        &:hover {
+          text-decoration: underline;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+  .album {
+    display: flex;
+    flex: 1;
+    font-size: 16px;
+    opacity: 0.88;
+    color: var(--color-text);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .time {
+    font-size: 16px;
+    width: 50px;
+    cursor: default;
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 10px;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.88;
+    color: var(--color-text);
+  }
+}
+.track.focus {
+  transition: all 0.3s;
+  background: var(--color-secondary-bg);
+}
+.track.disable {
+  img {
+    filter: grayscale(1) opacity(0.6);
+  }
+  .title,
+  .artist,
+  .album,
+  .time,
+  .no,
+  .featured {
+    opacity: 0.28 !important;
+  }
+  &:hover {
+    background: none;
+  }
+}
+.track.tracklist {
+  img {
+    height: 36px;
+    width: 36px;
+    border-radius: 6px;
+    margin-right: 14px;
+    cursor: pointer;
+  }
+  .title {
+    font-size: 16px;
+  }
+  .artist {
+    font-size: 12px;
+  }
+}
+.track.album {
+  height: 32px;
+}
+.actions {
+  width: 80px;
+  display: flex;
+  justify-content: flex-end;
+}
+.track.playing {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  .title,
+  .album,
+  .time,
+  .title-and-artist .translate {
+    color: var(--color-primary);
+  }
+  .title .featured,
+  .artist,
+  .explicit-symbol {
+    color: var(--color-primary);
+    opacity: 0.88;
+  }
+  .no span {
+    color: var(--color-primary);
+    opacity: 0.78;
+  }
+}
+</style>
