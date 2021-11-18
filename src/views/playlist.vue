@@ -179,6 +179,54 @@
         "
       >
       </TrackList>
+
+      <div class="load-more">
+        <ButtonTwoTone
+          v-show="hasMore"
+          color="grey"
+          :loading="loadingMore"
+          @click.native="loadMore(100)"
+        >
+          {{ $t('explore.loadMore') }}
+        </ButtonTwoTone>
+      </div>
+
+      <Modal
+        :show="showFullDescription"
+        :close="toggleFullDescription"
+        :show-footer="false"
+        :click-outside-hide="true"
+        title="歌单介绍"
+      >
+        {{ playlist.description }}
+      </Modal>
+
+      <ContextMenu ref="playlistMenu">
+        <div class="item" @click="likePlaylist(true)">
+          {{
+            playlist.subscribed
+              ? $t('contextMenu.removeFromLibrary')
+              : $t('contextMenu.saveToLibrary')
+          }}
+        </div>
+        <div class="item" @click="searchInPlaylist()">
+          {{ $t('contextMenu.searchInPlaylist') }}
+        </div>
+        <div
+          class="item"
+          v-if="playlist.creator.userId === data.user.userId"
+          @click="editPlaylist"
+        >
+          编辑歌单信息
+        </div>
+        <div 
+          class="item"
+          v-if="playlist.creator.userId === data.user.userId"
+          @click="deletePlaylist"
+        >
+          删除歌单
+        </div>
+      </ContextMenu>
     </div>
   </div>
 </template>
@@ -187,20 +235,20 @@
 import { mapMutations, mapActions, mapState } from 'vuex';
 import NProgress from 'nprogress';
 import {
-  getPlaylistDetail,
+  getPlaylistDetail, subscribePlaylist,
   // subscribePlaylist,
   // deletePlaylist,
 } from '@/api/playlist';
 // import { getTrackDetail } from '@/api/track';
-// import { isAccountLoggedIn } from '@/utils/auth';
+import { isAccountLoggedIn } from '@/utils/auth';
 // import nativeAlert from '@/utils/nativeAlert';
-// import locale from '@/locale';
+import locale from '@/locale';
 
 import ButtonTwoTone from '@/components/ButtonTwoTone.vue';
-// import ContextMenu from '@/components/ContextMenu.vue';
+import ContextMenu from '@/components/ContextMenu.vue';
 import TrackList from '@/components/TrackList.vue';
 import Cover from '@/components/Cover.vue';
-// import Modal from '@/components/Modal.vue';
+import Modal from '@/components/Modal.vue';
 
 const specialPlaylist = {
   2829816518: {
@@ -294,9 +342,9 @@ export default {
   components: {
     Cover,
     ButtonTwoTone,
-    // ContextMenu,
+    ContextMenu,
     TrackList,
-    // Modal,
+    Modal,
   },
   directives: {
     focus: {
@@ -323,6 +371,7 @@ export default {
       lastLoadedTrackIndex: 9,
       displaySearchInPlaylist: false,
       searchKeyWords: '',
+      inputSearchKeyWords: '',
       inputFocus: false,
       debounceTimeout: null,
       searchInputWidth: '0px', // 搜索栏宽度
@@ -376,11 +425,35 @@ export default {
   methods: {
     ...mapMutations(['appendTrackToPlayerList']),
     ...mapActions(['playFirstTrackOnlist', 'playTrackOnListByID', 'showToast']),
-    playPlaylistByTD(trackID = 'first') {
-      console.log(trackID);
+    playPlaylistByID(trackID = 'first') {
+      let trackIDs = this.playlist.trackIds.map(t => t.id);
+      this.$store.state.player.replacePlaylist(
+        trackIDs,
+        this.playlist.id,
+        'playlist',
+        trackID
+      );
     },
     likePlaylist(toast = false) {
-      console.log(toast);
+      if (!isAccountLoggedIn()) {
+        this.showToast(locale.t('toast.needToLogin'))
+        return;
+      }
+      subscribePlaylist({
+        id: this.playlist.id,
+        t: this.playlist.subscribeed ? 2 : 1,
+      }).then(data => {
+        if (data.code === 200) {
+          this.playlist.subscribeed = !this.playlist.subscribeed;
+          if (toast === true)
+            this.showToast(
+              this.playlist.subscribeed ? '已保存到音乐库' : '已从音乐库删除'
+            );
+        }
+        getPlaylistDetail(this.id, true).then(data => {
+          this.playlist = data.playlist;
+        });
+      });
     },
     loadData(id, next = undefined) {
       this.id = id;
@@ -404,8 +477,8 @@ export default {
     loadMore(loadNum = 100) {
       console.log(loadNum);
     },
-    openMenu() {
-
+    openMenu(e) {
+      this.$refs.playlistMenu.openMenu(e)
     },
     deletePlaylist() {
 
@@ -414,16 +487,31 @@ export default {
 
     },
     searchInPlaylist() {
-
+      this.displaySearchInPlaylist = !this.displaySearchInPlaylist || this.isLikeSongsPage;
+      if (this.displaySearchInPlaylist == false) {
+        this.searchKeyWords = '';
+        this.inputSearchKeyWords = '';
+      } else {
+        this.searchInputWidth = '172px';
+        this.loadMore(500);
+      }
     },
     removeTrack() {
 
     },
     inputDebounce() {
-
+      if (this.debounceTimeout) clearTimeout(this.debounceTimeout)
+      this.debounceTimeout = setTimeout(() => {
+        this.searchKeyWords = this.inputSearchKeyWords;
+      }, 600);
     },
     toggleFullDescription() {
-
+      this.showFullDescription = !this.showFullDescription;
+      if (this.showFullDescription) {
+        this.$store.commit('enableScrolling', false);
+      } else {
+        this.$store.commit('enableScrolling', true);
+      }
     },
   },
 };
@@ -490,6 +578,240 @@ export default {
       button {
         margin-right: 16px;
       }
+    }
+  }
+}
+
+.special-playlist {
+  margin-top: 192px;
+  margin-bottom: 128px;
+  border-radius: 1.25em;
+  text-align: center;
+  @keyframes letterSpacing4 {
+    from {
+      letter-spacing: 0px;
+    }
+    to {
+      letter-spacing: 4px;
+    }
+  }
+  @keyframes letterSpacing1 {
+    from {
+      letter-spacing: 0px;
+    }
+    to {
+      letter-spacing: 1px;
+    }
+  }
+  .title {
+    font-size: 84px;
+    line-height: 1.05;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    animation-duration: 0.8s;
+    animation-name: letterSpacing4;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    img {
+      height: 78px;
+      border-radius: 0.125em;
+      margin-right: 24px;
+    }
+  }
+  .subtitle {
+    font-size: 18px;
+    letter-spacing: 1px;
+    margin: 28px 0 54px 0;
+    animation-duration: 0.8s;
+    animation-name: letterSpacing1;
+    text-transform: uppercase;
+    color: var(--color-text);
+  }
+  .buttons {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+    button {
+      margin-right: 16px;
+    }
+  }
+}
+.gradient-test {
+  background-image: linear-gradient(to left, #92fe9d 0%, #00c9ff 100%);
+}
+
+[data-theme='dark'] {
+  .gradient-radar {
+    background-image: linear-gradient(to left, #92fe9d 0%, #00c9ff 100%);
+  }
+}
+
+.gradient-radar {
+  background-image: linear-gradient(to left, #0ba360 0%, #3cba92 100%);
+}
+
+.gradient-blue-purple {
+  background-image: linear-gradient(
+    45deg,
+    #89c4f5 0%,
+    #6284ff 42%,
+    #ff0000 100%
+  );
+}
+
+.gradient-sharp-blue {
+  background-image: linear-gradient(45deg, #00c6fb 0%, #005bea 100%);
+}
+
+.gradient-yellow-pink {
+  background-image: linear-gradient(45deg, #f6d365 0%, #fda085 100%);
+}
+
+.gradient-pink {
+  background-image: linear-gradient(45deg, #ee9ca7 0%, #ffdde1 100%);
+}
+
+.gradient-indigo-pink-yellow {
+  background-image: linear-gradient(
+    43deg,
+    #4158d0 0%,
+    #c850c0 46%,
+    #ffcc70 100%
+  );
+}
+
+.gradient-light-red-light-blue {
+  background-image: linear-gradient(
+    225deg,
+    hsl(190, 30%, 50%) 0%,
+    #081abb 38%,
+    #ec3841 58%,
+    hsl(13, 99%, 49%) 100%
+  );
+}
+
+.gradient-fog {
+  background: linear-gradient(-180deg, #bcc5ce 0%, #929ead 98%),
+    radial-gradient(
+      at top left,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+  background-blend-mode: screen;
+}
+
+.gradient-red {
+  background-image: linear-gradient(213deg, #ff0844 0%, #ffb199 100%);
+}
+
+.gradient-sky-blue {
+  background-image: linear-gradient(147deg, #48c6ef 0%, #6f86d6 100%);
+}
+
+.gradient-dark-blue-midnight-blue {
+  background-image: linear-gradient(213deg, #09203f 0%, #537895 100%);
+}
+
+.gradient-yellow-red {
+  background: linear-gradient(147deg, #fec867 0%, #f72c61 100%);
+}
+
+.gradient-yellow {
+  background: linear-gradient(147deg, #fceb02 0%, #fec401 100%);
+}
+
+.gradient-midnight-blue {
+  background-image: linear-gradient(-20deg, #2b5876 0%, #4e4376 100%);
+}
+
+.gradient-orange-red {
+  background-image: linear-gradient(147deg, #ffe53b 0%, #ff2525 74%);
+}
+
+.gradient-moonstone-blue {
+  background-image: linear-gradient(
+    147deg,
+    hsl(200, 34%, 8%) 0%,
+    hsl(204, 35%, 38%) 50%,
+    hsl(200, 34%, 18%) 100%
+  );
+}
+
+.gradient-pink-purple-blue {
+  background-image: linear-gradient(
+    to right,
+    #ff3cac 0%,
+    #784ba0 50%,
+    #2b86c5 100%
+  ) !important;
+}
+
+.gradient-green {
+  background-image: linear-gradient(
+    90deg,
+    #c6f6d5,
+    #68d391,
+    #38b2ac
+  ) !important;
+}
+
+.user-info {
+  h1 {
+    font-size: 42px;
+    position: relative;
+    color: var(--color-text);
+    .avatar {
+      height: 44px;
+      margin-right: 12px;
+      // 设置一个元素的垂直对齐方式
+      vertical-align: -7px;
+      border-radius: 50%;
+      border: rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+.search-box {
+  display: flex;
+  position: absolute;
+  right: 20px;
+  bottom: -55px;
+  justify-content: flex-end;
+  -webkit-app-region: no-drag;
+  .container {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    background: var(--color-secondary-bg-for-transparent);
+    border-radius: 8px;
+    width: 200px;
+  }
+  .svg-icon {
+    height: 15px;
+    width: 15px;
+    color: var(--color-text);
+    opacity: 0.28;
+    margin: {
+      left: 8px;
+      right: 4px;
+    }
+  }
+  input {
+    font-size: 16px;
+    border: none;
+    background: transparent;
+    width: 96%;
+    font-weight: 600;
+    margin-top: -1px;
+    color: var(--color-text);
+  }
+  .active {
+    background: var(--color-primary-bg-for-transparent);
+    input,
+    .svg-icon {
+      opacity: 1;
+      color: var(--color-primary);
     }
   }
 }

@@ -11,7 +11,7 @@
       <hr v-show="type !== 'cloudDisk'" />
       <div class="item" @click="play">{{ $t('contextMenu.play') }}</div>
       <div class="item" @click="addToQueue">
-        {{ $t('contextMenu.addToQuene') }}
+        {{ $t('contextMenu.addToQueue') }}
       </div>
       <div
         v-if="extraContextMenuItem.includes('removeTrackFromQueue')"
@@ -65,7 +65,7 @@
         :track-prop="track"
         :highlight-playing-track="highlightPlayingTrack"
         @dblclick.native="playThisList(track.id || track.songId)"
-        @click.right.native="openMenu($(event, track, index))"
+        @click.right.native="openMenu($event, track, index)"
       >
       </TrackListItem>
     </div>
@@ -176,8 +176,10 @@ export default {
   methods: {
     ...mapMutations(['updateModal']),
     ...mapActions(['nextTrack', 'showToast', 'likeATrack']),
-    openMenu() {
-
+    openMenu(e, track, index = -1) {
+      this.rightClickedTrack = track;
+      this.rightClickedTrackIndex = index;
+      this.$refs.menu.openMenu(e);
     },
     closeMenu() {
 
@@ -189,7 +191,7 @@ export default {
 
     },
     play() {
-
+      this.player.addTrackToPlayNext(this.rightClickedTrack.id, true);
     },
     addToQueue() {
       
