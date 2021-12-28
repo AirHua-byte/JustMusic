@@ -83,6 +83,7 @@ export function throttle(fn, time) {
   let isRun = false;
   return function () {
     if (isRun) return;
+    isRun = true;
     fn.apply(this, arguments);
     setTimeout(() => {
       isRun = false;

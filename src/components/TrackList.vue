@@ -74,13 +74,13 @@
 
 <script>
 import { mapActions, mapMutations, mapState } from 'vuex';
-// import { addOrRemoveTackFromPlaylist } from '@/api/playlist';
-// import { cloudDiskTrackDelete } from '@/api/user';
-// import { isAccountLoggedIn } from '@/utils/auth';
+import { addOrRemoveTrackFromPlaylist } from '@/api/playlist';
+import { cloudDiskTrackDelete } from '@/api/user';
+import { isAccountLoggedIn } from '@/utils/auth';
 
 import TrackListItem from '@/components/TrackListItem.vue';
 import ContextMenu from '@/components/ContextMenu.vue'
-// import locale from '@/locale';
+import locale from '@/locale';
 
 export default {
   name: 'TrackList',
@@ -184,32 +184,103 @@ export default {
     closeMenu() {
 
     },
-    playThisList() {
-
+    playThisList(trackID) {
+      if (this.dbclickTrackFunc == 'default') {
+        this.playThisListDefault(trackID)
+      } else if (this.dbclickTrackFunc == 'none') {
+        // nothing
+      } else if (this.dbclickTrackFunc == 'playTrackOnListByID') {
+        this.player.playTrackOnListByID(trackID)
+      } else if (this.dbclickTrackFunc == 'playPlaylistByID') {
+        this.player.playPlaylistByID(this.id, trackID)
+      } else if (this.dbclickTrackFunc == 'playAList') {
+        let trackIDs = this.tracks.map(t => t.id || t.songId)
+        this.player.replacePlaylist(trackIDs, this.id, 'artist', trackID)
+      } else if (this.dbclickTrackFunc === 'dailyTracks') {
+        let trackIDs = this.tracks.map(t => t.id);
+        this.player.replacePlaylist(trackIDs, '/daily/songs', 'url', trackID);
+      } else if (this.dbclickTrackFunc === 'playCloudDisk') {
+        let trackIDs = this.tracks.map(t => t.id || t.songId);
+        this.player.replacePlaylist(trackIDs, this.id, 'cloudDisk', trackID);
+      }
     },
-    playThisListDefault() {
-
+    playThisListDefault(trackID) {
+      if (this.type === 'playlist') {
+        this.player.playPlaylistByID(this.id, trackID);
+      } else if (this.type === 'album') {
+        this.player.playAlbumByID(this.id, trackID);
+      } else if (this.type === 'tracklist') {
+        let trackIDs = this.tracks.map(t => t.id);
+        this.player.replacePlaylist(trackIDs, this.id, 'artist', trackID);
+      }
     },
     play() {
       this.player.addTrackToPlayNext(this.rightClickedTrack.id, true);
     },
     addToQueue() {
-      
+      this.player.addTrackToPlayNext(this.rightClickedTrack.id)
     },
     like() {
-
+      this.likeATrack(this.rightClickedTrack.id);
     },
     addTrackToPlaylist() {
-      
+      if (!isAccountLoggedIn()) {
+        this.showToast(locale.t('toast.needToLogin'));
+        return;
+      }
+      this.updateModal({
+        modalName: 'addTrackToPlaylistModal',
+        key: 'show',
+        value: true,
+      });
+      this.updateModal({
+        modalName: 'addTrackToPlaylistModal',
+        key: 'selectedTrackID',
+        value: this.rightClickedTrack.id,
+      });
     },
     removeTrackFromPlaylist() {
-
+      if (!isAccountLoggedIn()) {
+        this.showToast(locale.t('toast.needToLogin'));
+        return;
+      }
+      if (confirm(`确定要从歌单删除 ${this.rightClickedTrack.name}？`)) {
+        let trackID = this.rightClickedTrack.id;
+        addOrRemoveTrackFromPlaylist({
+          op: 'del',
+          pid: this.id,
+          tracks: trackID,
+        }).then(data => {
+          this.showToast(
+            data.body.code === 200
+              ? locale.t('toast.removedFromPlaylist')
+              : data.body.message
+          );
+          this.$parent.removeTrack(trackID);
+        });
+      }
     },
     removeTrackFromQueue() {
-
+      this.$store.state.player.removeTrackFromQueue(
+        this.rightClickedTrackIndex
+      );
     },
     removeTrackFromCloudDisk() {
-
+      if (confirm(`确定要从云盘删除 ${this.rightClickedTrack.songName}？`)) {
+        let trackID = this.rightClickedTrack.songId;
+        cloudDiskTrackDelete(trackID).then(data => {
+          this.showToast(
+            data.code === 200 ? '已将此歌曲从云盘删除' : data.message
+          );
+          let newCloudDisk = this.liked.cloudDisk.filter(
+            t => t.songId !== trackID
+          );
+          this.$store.commit('updateLikedXXX', {
+            name: 'cloudDisk',
+            data: newCloudDisk,
+          });
+        });
+      }
     },
   },
 };

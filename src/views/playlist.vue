@@ -235,13 +235,13 @@
 import { mapMutations, mapActions, mapState } from 'vuex';
 import NProgress from 'nprogress';
 import {
-  getPlaylistDetail, subscribePlaylist,
-  // subscribePlaylist,
-  // deletePlaylist,
+  getPlaylistDetail,
+  subscribePlaylist,
+  deletePlaylist,
 } from '@/api/playlist';
-// import { getTrackDetail } from '@/api/track';
+import { getTrackDetail } from '@/api/track';
 import { isAccountLoggedIn } from '@/utils/auth';
-// import nativeAlert from '@/utils/nativeAlert';
+import nativeAlert from '@/utils/nativeAlert';
 import locale from '@/locale';
 
 import ButtonTwoTone from '@/components/ButtonTwoTone.vue';
@@ -439,15 +439,16 @@ export default {
         this.showToast(locale.t('toast.needToLogin'))
         return;
       }
+      console.log('收藏',this.playlist.subscribed)
       subscribePlaylist({
         id: this.playlist.id,
-        t: this.playlist.subscribeed ? 2 : 1,
+        t: this.playlist.subscribed ? 2 : 1,
       }).then(data => {
         if (data.code === 200) {
-          this.playlist.subscribeed = !this.playlist.subscribeed;
+          this.playlist.subscribed = !this.playlist.subscribed;
           if (toast === true)
             this.showToast(
-              this.playlist.subscribeed ? '已保存到音乐库' : '已从音乐库删除'
+              this.playlist.subscribed ? '已保存到音乐库' : '已从音乐库删除'
             );
         }
         getPlaylistDetail(this.id, true).then(data => {
@@ -475,16 +476,48 @@ export default {
         })
     },
     loadMore(loadNum = 100) {
-      console.log(loadNum);
+      let trackIDs = this.playlist.trackIds.filter((t, index) => {
+        if (
+          index > this.lastLoadedTrackIndex &&
+          index <= this.lastLoadedTrackIndex + loadNum
+        ) {
+          return t;
+        }
+      });
+      trackIDs = trackIDs.map(t => t.id);
+      getTrackDetail(trackIDs.join(',')).then(data => {
+        this.tracks.push(...data.songs);
+        this.lastLoadedTrackIndex += trackIDs.length;
+        this.loadingMore = false;
+        if (this.lastLoadedTrackIndex + 1 === this.playlist.trackIds.length) {
+          this.hasMore = false;
+        } else {
+          this.hasMore = true;
+        }
+      });
     },
     openMenu(e) {
       this.$refs.playlistMenu.openMenu(e)
     },
     deletePlaylist() {
-
+      if (!isAccountLoggedIn()) {
+        this.showToast(locale.t('toast.needToLogin'));
+        return;
+      }
+      let confirmation = confirm(`确定要删除歌单 ${this.playlist.name}？`);
+      if (confirmation === true) {
+        deletePlaylist(this.playlist.id).then(data => {
+          if (data.code === 200) {
+            nativeAlert(`已删除歌单 ${this.playlist.name}`);
+            this.$router.go(-1);
+          } else {
+            nativeAlert('发生错误');
+          }
+        });
+      }
     },
     editPlaylist() {
-
+      // 暂无
     },
     searchInPlaylist() {
       this.displaySearchInPlaylist = !this.displaySearchInPlaylist || this.isLikeSongsPage;
@@ -496,8 +529,13 @@ export default {
         this.loadMore(500);
       }
     },
-    removeTrack() {
-
+    removeTrack(trackID) {
+      // 子组件中调用
+      if (!isAccountLoggedIn()) {
+        this.showToast(locale.t('toast.needToLogin'));
+        return;
+      }
+      this.tracks = this.tracks.filter(t => t.id !== trackID);
     },
     inputDebounce() {
       if (this.debounceTimeout) clearTimeout(this.debounceTimeout)
@@ -516,7 +554,6 @@ export default {
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .playlist {
   margin-top: 32px;
@@ -535,6 +572,7 @@ export default {
       font-size: 36px;
       font-weight: 700;
       color: var(--color-text);
+
       .lock-icon {
         opacity: 0.28;
         color: var(--color-text);
@@ -551,7 +589,7 @@ export default {
       color: var(--color-text);
       margin-top: 24px;
     }
-    .data-and-count {
+    .date-and-count {
       font-size: 14px;
       opacity: 0.68;
       color: var(--color-text);
@@ -587,32 +625,44 @@ export default {
   margin-bottom: 128px;
   border-radius: 1.25em;
   text-align: center;
+
   @keyframes letterSpacing4 {
     from {
       letter-spacing: 0px;
     }
+
     to {
       letter-spacing: 4px;
     }
   }
+
   @keyframes letterSpacing1 {
     from {
       letter-spacing: 0px;
     }
+
     to {
       letter-spacing: 1px;
     }
   }
+
   .title {
     font-size: 84px;
     line-height: 1.05;
     font-weight: 700;
     text-transform: uppercase;
+
     letter-spacing: 4px;
     animation-duration: 0.8s;
     animation-name: letterSpacing4;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    // background-image: linear-gradient(
+    //   225deg,
+    //   var(--color-primary),
+    //   var(--color-primary)
+    // );
+
     img {
       height: 78px;
       border-radius: 0.125em;
@@ -637,6 +687,7 @@ export default {
     }
   }
 }
+
 .gradient-test {
   background-image: linear-gradient(to left, #92fe9d 0%, #00c9ff 100%);
 }
@@ -764,7 +815,6 @@ export default {
     .avatar {
       height: 44px;
       margin-right: 12px;
-      // 设置一个元素的垂直对齐方式
       vertical-align: -7px;
       border-radius: 50%;
       border: rgba(0, 0, 0, 0.2);
@@ -779,6 +829,7 @@ export default {
   bottom: -55px;
   justify-content: flex-end;
   -webkit-app-region: no-drag;
+
   .container {
     display: flex;
     align-items: center;
@@ -787,6 +838,7 @@ export default {
     border-radius: 8px;
     width: 200px;
   }
+
   .svg-icon {
     height: 15px;
     width: 15px;
@@ -797,6 +849,7 @@ export default {
       right: 4px;
     }
   }
+
   input {
     font-size: 16px;
     border: none;
@@ -806,6 +859,7 @@ export default {
     margin-top: -1px;
     color: var(--color-text);
   }
+
   .active {
     background: var(--color-primary-bg-for-transparent);
     input,
@@ -814,5 +868,90 @@ export default {
       color: var(--color-primary);
     }
   }
+}
+
+[data-theme='dark'] {
+  .search-box {
+    .active {
+      input,
+      .svg-icon {
+        color: var(--color-text);
+      }
+    }
+  }
+}
+
+.search-box-likepage {
+  display: flex;
+  position: absolute;
+  right: 12vw;
+  top: 95px;
+  justify-content: flex-end;
+  -webkit-app-region: no-drag;
+
+  .input {
+    transition: all 0.5s;
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    background: var(--color-secondary-bg-for-transparent);
+    border-radius: 8px;
+  }
+
+  .svg-icon {
+    height: 15px;
+    width: 15px;
+    color: var(--color-text);
+    opacity: 0.28;
+    margin: {
+      left: 8px;
+      right: 8px;
+    }
+  }
+
+  input {
+    font-size: 16px;
+    border: none;
+    background: transparent;
+    width: 96%;
+    font-weight: 600;
+    margin-top: -1px;
+    color: var(--color-text);
+  }
+
+  .active {
+    background: var(--color-primary-bg-for-transparent);
+    input,
+    .svg-icon {
+      opacity: 1;
+      color: var(--color-primary);
+    }
+  }
+}
+
+[data-theme='dark'] {
+  .search-box-likepage {
+    .active {
+      input,
+      .svg-icon {
+        color: var(--color-text);
+      }
+    }
+  }
+}
+
+@media (max-width: 1336px) {
+  .search-box-likepage {
+    right: 8vw;
+  }
+}
+
+.load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
 }
 </style>

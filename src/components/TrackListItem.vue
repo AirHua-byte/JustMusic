@@ -134,24 +134,24 @@ export default {
       else t = this.track.alia[0];
       return t;
     },
-    /* type() {
-
-    }, */
+    type() {
+      return this.$parent.type;
+    },
     isAlbum() {
       return this.type === 'album';
     },
     isTranslate() {
       return this.track?.tns?.length > 0 || this.track.alia?.length > 0;
     },
-    /* isPlaylist() {
-
-    }, */
+    isPlaylist() {
+      return this.type === 'playlist';
+    },
     isLiked() {
       return this.$parent.liked.songs.includes(this.track?.id);
     },
-    /* isPlaying() {
-
-    }, */
+    isPlaying() {
+      return this.$store.state.player.currentTrack.id === this.track?.id;
+    },
     trackClass() {
       let trackClass = [this.type];
       if (!this.track.playable && this.showUnavailableSongInGreyStyle)
@@ -161,9 +161,9 @@ export default {
       if (this.focus) trackClass.push('focus');
       return trackClass;
     },
-    /* isMenuOpened() {
-
-    }, */
+    isMenuOpened() {
+      return this.$parent.rightClickedTrack.id === this.track.id ? true : false;
+    },
     focus() {
       return (
         (this.hover && this.$parent.rightClickedTrack.id === 0) ||
@@ -190,13 +190,13 @@ export default {
   },
   methods: {
     goToAlbum() {
-
+      this.$router.push({ path: '/album/' + this.track.al.id })
     },
     playTrack() {
-
+      this.$parent.playThisList(this.track.id)
     },
     likeThisSong() {
-
+      this.$parent.likeATrack(this.track.id)
     },
   },
 };
